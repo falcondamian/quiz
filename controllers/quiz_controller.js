@@ -60,8 +60,20 @@ exports.create = function(req, res) {
 
 	var quiz = 	models.Quiz.build(req.body.quiz);
 
-	quiz.save({fields : ['pregunta','respuesta']}).then(function () {
+	quiz.validate().then(function (err) {
 
-		res.redirect('/quizes');
-	});	
+		if (err) {
+
+			res.render('quizes/new', {quiz : quiz, errors : err.errors});
+
+		} else {
+
+			quiz.save({fields : ['pregunta','respuesta']}).then(function () {
+
+				res.redirect('/quizes');
+			});	
+		}
+	});
+
+		
 };
