@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var partials = require('express-partials');
 var methodOverride = require('method-override');
+var session = require('express-session');
 
 var routes = require('./routes/index');
 
@@ -23,9 +24,27 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
+app.use(cookieParser('quiz 2015'));
+app.use(session({resave: true, saveUninitialized: true}));
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(function(req, res, next) {
+
+    // si no existe lo inicializa
+    if (!req.session.redir) {
+        req.session.redir = '/';
+    }
+    // guardar path en session.redir para despues de login
+    if (!req.path.match(/\/login|\/logout|\/user/)) {
+        req.session.redir = req.path;
+    }
+    
+    //Hacemos visible la sesión para las vistas
+    res.locals.session = req.session;
+
+    next();
+});
 
 app.use('/', routes);
 
