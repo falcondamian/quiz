@@ -46,6 +46,30 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.use(function(req, res, next) {
+
+    // si no existe es que no hay login
+    if (req.session.sessionTimeout) {
+
+        if (new Date().getTime() - req.session.sessionTimeout > 10000) {
+            //elimino sesion
+            delete req.session.user;
+            delete req.session.sessionTimeout;
+            req.session.errors = [{"message": 'Sesión expirada'}];
+            res.redirect("/login"); 
+
+        } else {
+            //actualizo y continuo
+            req.session.sessionTimeout = new Date().getTime();
+            next();
+        }
+
+    } else {
+
+        next();
+    }
+});
+
 app.use('/', routes);
 
 // catch 404 and forward to error handler
